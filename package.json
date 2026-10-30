@@ -1,11 +1,13 @@
 {
   "name": "checkdon-mcp",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "MCP kiểm tra hóa đơn và service nhận đơn Telegram theo kiến trúc nhiều lớp",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node --env-file-if-exists=.env --use-env-proxy server.js",
+    "start:postdon": "node --env-file-if-exists=.env --use-env-proxy scripts/start-postdon.js",
+    "start:all": "node --env-file-if-exists=.env --use-env-proxy scripts/start-all.js",
+    "test": "node --test tests/*.test.js"
   },
   "keywords": [],
   "author": "",
@@ -17,7 +19,11 @@
     "@modelcontextprotocol/node": "^2.1.2",
     "@modelcontextprotocol/server": "^2.4.0",
     "express": "^5.3.0",
+    "googleapis": "^188.0.0",
     "jose": "^6.2.13",
     "zod": "^4.6.7"
+  },
+  "engines": {
+    "node": ">=24.5.0"
   }
 }
