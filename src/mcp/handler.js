@@ -36,6 +36,12 @@ export function createCheckdonHandler({ invoiceService }) {
             })
         );
 
+        server.registerTool("check_order", {
+            title: "Check Order", description: "Kiểm tra đơn bằng danh mục RAM, không truy vấn MySQL trong lời gọi tool.",
+            inputSchema: z.object({ order: orderSchema }),
+            securitySchemes: [{ type: "oauth2", scopes: ["openid", "profile", "email"] }]
+        }, async ({ order }) => ({ content: [{ type: "text", text: JSON.stringify(await invoiceService.checkOrder({ order })) }] }));
+
         // Công cụ nhận JSON đơn hàng và hóa đơn
         server.registerTool(
             "check_invoice",
@@ -43,8 +49,8 @@ export function createCheckdonHandler({ invoiceService }) {
                 title: "Check Invoice",
                 description:
                     "Nhận JSON đơn hàng và hóa đơn đã được GPT chuẩn hóa. " +
-                    "Phiên bản hiện tại chỉ trả kết quả minh họa, " +
-                    "chưa đối chiếu hóa đơn với dữ liệu nghiệp vụ.",
+                    "Kiểm tra danh mục và số học trên snapshot RAM. " +
+                    "Quy tắc giá/khuyến mãi chưa chốt được trả về để xác nhận.",
 
                 // API mới: bọc schema bằng z.object()
                 inputSchema: z.object({

@@ -6,11 +6,11 @@ import { once } from "node:events";
 const cwd = new URL("..", import.meta.url);
 // Kể cả môi trường thực có khóa, các test CLI này không được bật dịch vụ bên ngoài.
 const env = {
-    ...process.env, PORT: "0", TELEGRAM_BOT_TOKEN: "", CHECKDON_WORKBOOK_ID: "",
+    ...process.env, DATA_PROVIDER: "memory", PORT: "0", TELEGRAM_BOT_TOKEN: "", CHECKDON_WORKBOOK_ID: "",
     GOOGLE_CLIENT_EMAIL: "", GOOGLE_PRIVATE_KEY: ""
 };
 
-test("npm start khởi động HTTP không cần khóa postdon và dừng sạch bằng SIGTERM", { timeout: 10_000 }, async () => {
+test("npm start ở chế độ memory kiểm thử khởi động HTTP không cần khóa postdon và dừng sạch bằng SIGTERM", { timeout: 10_000 }, async () => {
     // Dùng nguyên lệnh Node trong package script, không qua shell để quản lý đúng PID.
     const child = spawn(process.execPath, ["--env-file-if-exists=.env", "--use-env-proxy", "server.js"], { cwd, env, stdio: ["ignore", "pipe", "pipe"] });
     const exited = once(child, "exit");

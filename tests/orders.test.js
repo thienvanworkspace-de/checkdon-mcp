@@ -99,7 +99,7 @@ test("danh mục giữ dữ liệu A:F gồm tiêu đề cho tới khi có schem
 });
 
 test("composition root nối polling → business → Sheet và đọc danh mục bằng cùng gateway", async () => {
-    const { createPostdonServices } = await import("../src/container.js");
+    const { createApplicationContainer, registerPostdon } = await import("../src/container.js");
     const { fake, gateway } = fixture();
     const controller = new AbortController();
     let received = false;
@@ -111,12 +111,32 @@ test("composition root nối polling → business → Sheet và đọc danh mụ
             { update_id: 2, edited_message: message({ text: "Đơn đã sửa qua worker" }) }
         ];
     } };
-    const services = await createPostdonServices({
-        botToken: "fake", workbookId: "fake", clientEmail: "fake", privateKey: "fake"
-    }, { gateway, client, logger: { info() {}, warn() {} } });
+    const container = createApplicationContainer({ config: {
+        dataProvider: "mysql", database: {}, sync: {}, postdon: {
+            botToken: "fake", workbookId: "fake", clientEmail: "fake", privateKey: "fake"
+        }
+    }, logger: { info() {}, warn() {} }, overrides: {
+        orderRepository: new OrderSheetRepository({ gateway, workbookId: "test-book" })
+    } });
+    await registerPostdon(container, { gateway, client });
+    const services = container.cradle;
     await services.poller.run(controller.signal);
     assert.equal(fake.rows.length, 2);
     assert.equal(fake.rows[1][2], "Đơn đã sửa qua worker");
     assert.equal(services.poller.offset, 3);
-    assert.deepEqual(await services.productService.getProducts(), fake.rows);
+    await container.dispose();
+});
+
+test("layout accounting ánh xạ theo header đổi thứ tự; không sửa các cột kế toán", async () => {
+    const fake = fakeSheets([["Trạng thái", "Ngày", "_order_key", "Bổ sung", "Orders_checked", "Nội dung", "Checked"],
+        ["Đã duyệt", "31/10/2026", "-123:12", "Ghi chú", "[]", "Nội dung cũ", true]]);
+    const gateway = new GoogleSheetsGateway({ client: fake.client });
+    const repository = new OrderSheetRepository({ gateway, workbookId: "book", sheetLayout: "accounting" });
+    await repository.updateContent("-123:12", "Nội dung mới");
+    assert.equal(fake.writes[0].range, "'Đơn Hàng'!F2");
+    assert.equal(fake.rows[1][0], "Đã duyệt");
+    assert.equal(fake.rows[1][6], true);
+    assert.deepEqual([...await repository.listKeys()], ["-123:12"]);
+    fake.rows[0][2] = "Cột sai";
+    await assert.rejects(repository.listKeys(), /thiếu hoặc trùng/);
 });

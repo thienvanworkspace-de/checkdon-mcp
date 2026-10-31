@@ -1,13 +1,15 @@
 {
   "name": "checkdon-mcp",
   "version": "1.0.0",
-  "description": "MCP kiểm tra hóa đơn và service nhận đơn Telegram theo kiến trúc nhiều lớp",
+  "description": "MCP và Postdon với MySQL, Awilix DI, cache RAM và đồng bộ Google Sheets",
   "main": "server.js",
   "scripts": {
     "start": "node --env-file-if-exists=.env --use-env-proxy server.js",
     "start:postdon": "node --env-file-if-exists=.env --use-env-proxy scripts/start-postdon.js",
     "start:all": "node --env-file-if-exists=.env --use-env-proxy scripts/start-all.js",
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/*.test.js",
+    "test:mysql": "node --test tests/mysql.integration.js",
+    "db:schema": "node scripts/generate-schema.js"
   },
   "keywords": [],
   "author": "",
@@ -18,9 +20,13 @@
     "@modelcontextprotocol/express": "^2.0.2",
     "@modelcontextprotocol/node": "^2.1.2",
     "@modelcontextprotocol/server": "^2.4.0",
+    "awilix": "^13.0.5",
+    "decimal.js": "^10.6.0",
     "express": "^5.3.0",
     "googleapis": "^188.0.0",
     "jose": "^6.2.13",
+    "mysql2": "^3.24.6",
+    "sequelize": "^6.37.8",
     "zod": "^4.6.7"
   },
   "engines": {

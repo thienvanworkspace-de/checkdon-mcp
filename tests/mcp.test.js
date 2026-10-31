@@ -6,13 +6,13 @@ import { generateKeyPair, exportJWK, SignJWT } from "jose";
 import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
 import { loadConfig, validatePostdonConfig } from "../src/config/index.js";
 import { createApp } from "../src/http/app.js";
-import { createMcpServices } from "../src/container.js";
+import { createMcpServices, emptyCatalog } from "../src/container.js";
 import { startRuntime } from "../src/runtime.js";
 
 const logger = { info() {}, warn() {}, error() {} };
 
 test("cấu hình postdon được kiểm tra riêng; MCP không yêu cầu khóa Google/Telegram", async () => {
-    const config = loadConfig({ PORT: "0" });
+    const config = loadConfig({ DATA_PROVIDER: "memory", PORT: "0" });
     assert.throws(() => validatePostdonConfig(config.postdon), /TELEGRAM_BOT_TOKEN/);
     await assert.rejects(startRuntime({ mcp: true, postdon: true, config, logger }), /Thiếu cấu hình/);
     const runtime = await startRuntime({ config, logger });
@@ -39,12 +39,17 @@ test("MCP/OAuth hoạt động sau khi tách lớp — identity provider cục b
     });
     issuer.listen(0, "127.0.0.1");
     await once(issuer, "listening");
-    const config = loadConfig({});
+    const config = loadConfig({ DATA_PROVIDER: "memory" });
     config.authkitIssuer = `http://127.0.0.1:${issuer.address().port}`;
     config.allowedEmails = ["test@example.invalid"];
     // Tạo resource audience ổn định dù cổng HTTP được cấp động.
     config.mcpResourceUrl = "https://mcp.example.invalid/mcp";
-    const app = createApp({ config, services: createMcpServices(), logger });
+    const data = { ...emptyCatalog(), customers: [{ id: 1, code: "KH1", isActive: 1 }],
+        products: [{ id: 1, code: "SP1", isActive: 1, unitPrice: "100.00" }], loadedAt: "test" };
+    data.customer = code => data.customers.find(row => row.code === code);
+    data.product = code => data.products.find(row => row.code === code);
+    const catalogCache = { ready: true, getSnapshot: () => data };
+    const app = createApp({ config, services: createMcpServices({ catalogCache }), logger });
     const server = app.listen(0, "127.0.0.1");
     await once(server, "listening");
     const base = `http://127.0.0.1:${server.address().port}`;
@@ -84,11 +89,11 @@ test("MCP/OAuth hoạt động sau khi tách lớp — identity provider cục b
         identityFailure = false;
         identity = { email: "test@example.invalid", email_verified: true };
     });
-    await t.test("handshake, listTools, hello và check_invoice demo", async () => {
+    await t.test("handshake, listTools, hello và check_invoice dùng cache", async () => {
         const client = new Client({ name: "test", version: "1.0.0" });
         try {
             await client.connect(new StreamableHTTPClientTransport(new URL(resource), { requestInit: { headers } }));
-            assert.deepEqual((await client.listTools()).tools.map(tool => tool.name).sort(), ["check_invoice", "hello_checkdon"]);
+            assert.deepEqual((await client.listTools()).tools.map(tool => tool.name).sort(), ["check_invoice", "check_order", "hello_checkdon"]);
             const hello = await client.callTool({ name: "hello_checkdon", arguments: { name: "Test" } });
             assert.ok(!hello.isError);
             assert.match(hello.content[0].text, /Xin chào Test!/);
@@ -97,7 +102,7 @@ test("MCP/OAuth hoạt động sau khi tách lớp — identity provider cục b
                 invoice: { invoice_number: "HD1", customer_code: "KH1", products: [{ product_code: "SP1", qty: 1, unit_price: 100, amount: 100, net_amount: 100 }], net_amount: 100 }
             } });
             assert.ok(!invoice.isError);
-            assert.equal(JSON.parse(invoice.content[0].text).message_code, "DEMO_ONLY");
+            assert.equal(JSON.parse(invoice.content[0].text).message_code, "CHECK_RESULT");
             const invalid = await client.callTool({ name: "check_invoice", arguments: { order: {}, invoice: {} } });
             assert.equal(invalid.isError, true);
         } finally {
