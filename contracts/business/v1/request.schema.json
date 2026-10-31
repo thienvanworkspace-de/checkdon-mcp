@@ -1,0 +1,860 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        "context": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string",
+              "enum": [
+                "mcp",
+                "telegram",
+                "sheet",
+                "internal"
+              ]
+            },
+            "actorSubject": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "source"
+          ],
+          "additionalProperties": false
+        },
+        "operation": {
+          "type": "string",
+          "const": "orders.create"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 191
+            },
+            "content": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "key",
+            "content"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "contractVersion",
+        "requestId",
+        "context",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        "context": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string",
+              "enum": [
+                "mcp",
+                "telegram",
+                "sheet",
+                "internal"
+              ]
+            },
+            "actorSubject": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "source"
+          ],
+          "additionalProperties": false
+        },
+        "operation": {
+          "type": "string",
+          "const": "orders.updateContent"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 191
+            },
+            "content": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "key",
+            "content"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "contractVersion",
+        "requestId",
+        "context",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        "context": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string",
+              "enum": [
+                "mcp",
+                "telegram",
+                "sheet",
+                "internal"
+              ]
+            },
+            "actorSubject": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "source"
+          ],
+          "additionalProperties": false
+        },
+        "operation": {
+          "type": "string",
+          "const": "orders.check"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "order": {
+              "type": "object",
+              "properties": {
+                "order_number": {
+                  "type": "string"
+                },
+                "customer_code": {
+                  "type": "string"
+                },
+                "products": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "product_code": {
+                        "type": "string"
+                      },
+                      "qty": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "pattern": "^-?\\d+(\\.\\d+)?$"
+                      },
+                      "unit_price": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 64,
+                            "pattern": "^-?\\d+(\\.\\d+)?$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "discount_rate": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 64,
+                            "pattern": "^-?\\d+(\\.\\d+)?$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "promotion_policy": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "product_code",
+                      "qty"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "discount_rate": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 64,
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "promotion_policy": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "isPromoted": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "order_number",
+                "customer_code",
+                "products"
+              ],
+              "additionalProperties": false
+            },
+            "catalog": {
+              "type": "object",
+              "properties": {
+                "loadedAt": {
+                  "type": "string"
+                },
+                "customers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                },
+                "products": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                },
+                "accountants": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                },
+                "customerFeatures": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                },
+                "specificPrices": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                },
+                "specificPromotions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                },
+                "programPromotions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                },
+                "productLots": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                },
+                "hospitalPrices": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "loadedAt",
+                "customers",
+                "products",
+                "accountants",
+                "customerFeatures",
+                "specificPrices",
+                "specificPromotions",
+                "programPromotions",
+                "productLots",
+                "hospitalPrices"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "order",
+            "catalog"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "contractVersion",
+        "requestId",
+        "context",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        "context": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string",
+              "enum": [
+                "mcp",
+                "telegram",
+                "sheet",
+                "internal"
+              ]
+            },
+            "actorSubject": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "source"
+          ],
+          "additionalProperties": false
+        },
+        "operation": {
+          "type": "string",
+          "const": "invoices.check"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "order": {
+              "type": "object",
+              "properties": {
+                "order_number": {
+                  "type": "string"
+                },
+                "customer_code": {
+                  "type": "string"
+                },
+                "products": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "product_code": {
+                        "type": "string"
+                      },
+                      "qty": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "pattern": "^-?\\d+(\\.\\d+)?$"
+                      },
+                      "unit_price": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 64,
+                            "pattern": "^-?\\d+(\\.\\d+)?$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "discount_rate": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 64,
+                            "pattern": "^-?\\d+(\\.\\d+)?$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "promotion_policy": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "product_code",
+                      "qty"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "discount_rate": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 64,
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "promotion_policy": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "isPromoted": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "order_number",
+                "customer_code",
+                "products"
+              ],
+              "additionalProperties": false
+            },
+            "invoice": {
+              "type": "object",
+              "properties": {
+                "invoice_number": {
+                  "type": "string"
+                },
+                "customer_code": {
+                  "type": "string"
+                },
+                "products": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "product_code": {
+                        "type": "string"
+                      },
+                      "qty": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "pattern": "^-?\\d+(\\.\\d+)?$"
+                      },
+                      "unit_price": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "pattern": "^-?\\d+(\\.\\d+)?$"
+                      },
+                      "amount": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "pattern": "^-?\\d+(\\.\\d+)?$"
+                      },
+                      "net_amount": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "pattern": "^-?\\d+(\\.\\d+)?$"
+                      },
+                      "line": {
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "lot_number": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "expiry_date": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "discount_rate": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 64,
+                            "pattern": "^-?\\d+(\\.\\d+)?$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "discount_amount": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 64,
+                            "pattern": "^-?\\d+(\\.\\d+)?$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "product_code",
+                      "qty",
+                      "unit_price",
+                      "amount",
+                      "net_amount"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "discount_rate": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 64,
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "discount_amount": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 64,
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "net_amount": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "pattern": "^-?\\d+(\\.\\d+)?$"
+                }
+              },
+              "required": [
+                "invoice_number",
+                "customer_code",
+                "products",
+                "net_amount"
+              ],
+              "additionalProperties": false
+            },
+            "catalog": {
+              "type": "object",
+              "properties": {
+                "loadedAt": {
+                  "type": "string"
+                },
+                "customers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                },
+                "products": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                },
+                "accountants": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                },
+                "customerFeatures": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                },
+                "specificPrices": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                },
+                "specificPromotions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                },
+                "programPromotions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                },
+                "productLots": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                },
+                "hospitalPrices": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "loadedAt",
+                "customers",
+                "products",
+                "accountants",
+                "customerFeatures",
+                "specificPrices",
+                "specificPromotions",
+                "programPromotions",
+                "productLots",
+                "hospitalPrices"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "order",
+            "invoice",
+            "catalog"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "contractVersion",
+        "requestId",
+        "context",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ],
+  "$defs": {
+    "__schema0": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema0"
+          }
+        },
+        {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/__schema0"
+          }
+        }
+      ]
+    }
+  },
+  "$id": "urn:checkdon:business:v1:request"
+}

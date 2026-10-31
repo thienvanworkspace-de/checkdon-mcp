@@ -178,6 +178,29 @@ test("MySQL 8 integration: schema, transaction, cache, webhook, outbox, archive"
             assert.equal(services.catalogCache.getSnapshot().customer("KHHTTP").name, "HTTP");
         } finally { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
     });
+    await t.test("adapter procedure dùng CALL JSON thật, không thay nghiệp vụ Node mặc định", async () => {
+        await sequelize.query("DROP PROCEDURE IF EXISTS sp_test_business_contract");
+        await sequelize.query(`CREATE PROCEDURE sp_test_business_contract(IN p_request JSON)
+            SELECT JSON_OBJECT('contractVersion', '1.0',
+                'requestId', JSON_UNQUOTE(JSON_EXTRACT(p_request, '$.requestId')),
+                'operation', JSON_UNQUOTE(JSON_EXTRACT(p_request, '$.operation')),
+                'success', JSON_EXTRACT('true', '$'),
+                'data', JSON_OBJECT('created', JSON_EXTRACT('true', '$'),
+                    'key', JSON_UNQUOTE(JSON_EXTRACT(p_request, '$.payload.key')))) AS response`);
+        const root = createApplicationContainer({ config: loadConfig({ DATA_PROVIDER: "memory",
+            BUSINESS_ROUTES: '{"orders.create":"procedure"}',
+            BUSINESS_PROCEDURES: '{"orders.create":"sp_test_business_contract"}'
+        }), overrides: { sequelize } });
+        try {
+            const count = await models.Order.count();
+            assert.deepEqual(await root.cradle.orderService.postOrder("contract-test", "Dữ liệu test"),
+                { created: true, key: "contract-test" });
+            assert.equal(await models.Order.count(), count); // Procedure test chỉ kiểm tra giao thức.
+        } finally {
+            await root.dispose();
+            await sequelize.query("DROP PROCEDURE sp_test_business_contract");
+        }
+    });
     await t.test("runtime dùng Connection/Model Factory tải cache trước khi listen và đóng pool khi dừng", async () => {
         const runtimeConfig = loadConfig({ DATA_PROVIDER: "mysql", PORT: "0", DB_HOST: "127.0.0.1", DB_PORT: String(port),
             DB_NAME: "checkdon_test", DB_USERNAME: "root", DB_PASSWORD: "local-test-only", DB_TLS: "false",

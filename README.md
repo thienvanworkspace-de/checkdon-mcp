@@ -17,6 +17,8 @@ Thiết kế trong code `learn_sqlize` là nền của models. Các Sheet đang 
 
 | Đường dẫn | Vai trò |
 | --- | --- |
+| `src/models/` | Mỗi model một lớp/file riêng; registry và quan hệ tách biệt. |
+| `src/application/` | Application services, use cases, contracts và cổng thực thi nghiệp vụ; hiện mặc định Node. |
 | `src/container.js` | Composition root Awilix, singleton, dependency injection và dispose pool. |
 | `src/infrastructure/mysql/` | Connection Factory, Model Factory và transaction retry khi deadlock. |
 | `src/data/mysql/` | Repositories cho danh mục, đồng bộ và đơn hàng. |
@@ -30,6 +32,8 @@ Thiết kế trong code `learn_sqlize` là nền của models. Các Sheet đang 
 | `apps-script/Code.gs` | Installable triggers, mapping Sheet, hàng đợi bền vững, ký webhook. |
 | `migrations/001-initial.sql` | SQL sinh từ models để review cho database MỚI; không tự chạy. |
 | `tests/` | Unit/HTTP tests và integration tests riêng với MySQL container local. |
+
+Kiến trúc lớp/model và ranh giới mở rộng nghiệp vụ: [docs/business-architecture.md](docs/business-architecture.md). Check đơn/Postđơn hiện vẫn chạy Node.js, chưa có service Java/C#.
 
 Chi tiết hợp đồng dữ liệu, thiết lập Apps Script và giới hạn đồng bộ: [docs/mysql-sync.md](docs/mysql-sync.md).
 

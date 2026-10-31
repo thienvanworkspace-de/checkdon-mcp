@@ -31,7 +31,8 @@ export function createApp({ config, services, logger = console }) {
     const handler = toNodeHandler(createCheckdonHandler(services));
     app.all("/mcp", createOAuthMiddleware({ config, logger }), async (req, res) => {
         try {
-            await handler(req, res, req.body);
+            await services.requestContext.run({ source: "mcp", actorSubject: req.auth.subject },
+                () => handler(req, res, req.body));
         } catch {
             logger.error("MCP không xử lý được request.");
             if (!res.headersSent) res.status(500).json({ error: "internal_error", message: "MCP server gặp lỗi nội bộ." });

@@ -1,6 +1,5 @@
 import { createContainer as createAwilixContainer, asValue, asFunction, asClass, InjectionMode } from "awilix";
-import { InvoiceService } from "./business/invoice-service.js";
-import { OrderService } from "./business/order-service.js";
+import { registerBusiness } from "./application/register-business.js";
 import { ProductService } from "./business/product-service.js";
 import { CatalogCache } from "./cache/catalog-cache.js";
 import { createSequelize } from "./infrastructure/mysql/connection-factory.js";
@@ -51,13 +50,12 @@ export function createApplicationContainer({ config, logger = console, overrides
         }).singleton(),
         sheetSyncService: asClass(SheetSyncService).singleton(),
         orderRepository: asClass(OrderMysqlRepository).singleton(),
-        orderService: asClass(OrderService).singleton(),
-        invoiceService: asClass(InvoiceService).singleton(),
         // Danh mục sản phẩm phục vụ các business khác cũng đọc từ cache RAM.
         productRepository: asFunction(({ catalogCache }) => ({ getProducts: async () => catalogCache.getSnapshot().products })).singleton(),
         productService: asClass(ProductService).singleton(),
         clock: asValue(() => new Date())
     });
+    registerBusiness(container, config);
     if (config.dataProvider === "memory") {
         // Chỉ dành cho test/demo: không phải fallback tự động khi MySQL lỗi.
         container.register({ catalogRepository: asValue({ loadAll: async () => emptyCatalog() }) });

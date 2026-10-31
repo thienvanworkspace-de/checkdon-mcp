@@ -1,3 +1,5 @@
+import { loadBusinessConfig } from "./business-config.js";
+
 /** Đọc cấu hình tại lúc khởi động, không kết nối dịch vụ trong lúc import module. */
 export function loadConfig(env = process.env) {
     const port = Number(env.PORT || 3000);
@@ -7,6 +9,7 @@ export function loadConfig(env = process.env) {
 
     return {
         port,
+        business: loadBusinessConfig(env),
         dataProvider: env.DATA_PROVIDER || "mysql",
         database: {
             name: env.DB_NAME, username: env.DB_USERNAME, password: env.DB_PASSWORD,

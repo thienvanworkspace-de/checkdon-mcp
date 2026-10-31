@@ -1,8 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { CatalogCache } from "../src/cache/catalog-cache.js";
-import { InvoiceService } from "../src/business/invoice-service.js";
-import { emptyCatalog } from "../src/container.js";
+import { emptyCatalog, createMcpServices } from "../src/container.js";
 import { promotionPolicyParse } from "../src/business/promotion/promotion-policy-parser.js";
 import { calculatePromotion } from "../src/business/promotion/calculate-promotion.js";
 
@@ -28,7 +27,7 @@ test("check MCP chỉ đọc RAM; Decimal không báo sai 3 × 0.1 = 0.3", async
     let reads = 0;
     const cache = new CatalogCache({ catalogRepository: { loadAll: async () => { reads++; return catalog(); } } });
     await cache.refresh();
-    const service = new InvoiceService({ catalogCache: cache });
+    const service = createMcpServices({ catalogCache: cache }).invoiceService;
     for (let i = 0; i < 3; i++) {
         const result = await service.checkInvoice({ order, invoice });
         assert.equal(result.message_code, "CHECK_RESULT");
@@ -45,7 +44,7 @@ test("không tự áp thứ tự ưu tiên giá/chiết khấu/KM", async () => 
     data.hospitalPrices = [{ customerId: 1, productId: 1, unitPrice: "0.30", soldQuantity: "2.000" }];
     const cache = new CatalogCache({ catalogRepository: { loadAll: async () => data } });
     await cache.refresh();
-    const result = await new InvoiceService({ catalogCache: cache }).checkOrder({ order });
+    const result = await createMcpServices({ catalogCache: cache }).invoiceService.checkOrder({ order });
     assert.equal(result.requires_review, true);
     assert.equal(result.references[0].hospitalPrices[0].unitPrice, "0.30");
     assert.ok(result.warnings.some(row => row.code === "POLICY_CONFIRMATION_REQUIRED"));

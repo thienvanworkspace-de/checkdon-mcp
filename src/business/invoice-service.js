@@ -1,13 +1,12 @@
-import Decimal from "decimal.js";
+import DecimalJs from "decimal.js";
 
-/** Business kiểm tra chỉ đọc một snapshot RAM, không giữ repository/connection DB. */
+// Đủ độ chính xác cho các decimal DTO tối đa 64 ký tự; không đổi cấu hình Decimal toàn cục.
+const Decimal = DecimalJs.clone({ precision: 160 });
+
+/** Luật nghiệp vụ thuần: nhận snapshot từ use case, không biết cache/transport/Sequelize. */
 export class InvoiceService {
-    constructor({ catalogCache }) { this.cache = catalogCache; }
-
     async checkOrder({ order }, snapshot) {
-        let data;
-        try { data = snapshot ?? this.cache.getSnapshot(); }
-        catch { return { message_code: "CATALOG_NOT_READY", errors: [], requires_review: true }; }
+        const data = snapshot;
         const errors = [];
         const warnings = [];
         const references = [];
@@ -19,7 +18,7 @@ export class InvoiceService {
             const product = data.product(line.product_code);
             const fail = (code, details = {}) => errors.push({ error_code: code, line: index + 1, product_code: line.product_code, ...details });
             if (!product || product.isActive === 0) { fail("PRODUCT_NOT_FOUND_OR_INACTIVE"); continue; }
-            if (!Number.isFinite(line.qty) || line.qty <= 0) fail("INVALID_QUANTITY");
+            if (!Number.isFinite(Number(line.qty)) || line.qty <= 0) fail("INVALID_QUANTITY");
             const specificPrices = data.specificPrices.filter(row => row.customerId === customer?.id && row.productId === product.id && row.isActive !== 0);
             const specificPromotions = data.specificPromotions.filter(row => row.customerId === customer?.id && row.productId === product.id && row.isActive !== 0);
             const programPromotions = data.programPromotions.filter(row => (row.productId == null || row.productId === product.id) && row.isActive !== 0);
@@ -44,10 +43,7 @@ export class InvoiceService {
         };
     }
 
-    async checkInvoice({ order, invoice }) {
-        let snapshot;
-        try { snapshot = this.cache.getSnapshot(); }
-        catch { return { message_code: "CATALOG_NOT_READY", errors: [], requires_review: true }; }
+    async checkInvoice({ order, invoice }, snapshot) {
         const result = await this.checkOrder({ order }, snapshot);
         if (result.message_code === "CATALOG_NOT_READY") return result;
         const errors = [...result.errors];
